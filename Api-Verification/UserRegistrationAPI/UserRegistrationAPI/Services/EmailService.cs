@@ -3,7 +3,6 @@ using System.Net;
 
 namespace UserRegistrationAPI.Services
 {
-
     public class EmailService
     {
         private readonly IConfiguration _configuration;
@@ -13,9 +12,11 @@ namespace UserRegistrationAPI.Services
             _configuration = configuration;
         }
 
-        public void SendEmail(string to, string subject, string body)
+        public async Task SendEmailAsync(string userEmail, string subject, string body)
         {
             var emailSettings = _configuration.GetSection("EmailSettings");
+
+            // Configuração do cliente SMTP
             var smtpClient = new SmtpClient(emailSettings["SmtpServer"])
             {
                 Port = int.Parse(emailSettings["SmtpPort"]),
@@ -23,16 +24,20 @@ namespace UserRegistrationAPI.Services
                 EnableSsl = true,
             };
 
+            // Criando o e-mail a ser enviado
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(emailSettings["FromEmail"]),
+                From = new MailAddress(emailSettings["FromEmail"]), // E-mail de envio
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true,
             };
-            mailMessage.To.Add(to);
 
-            smtpClient.Send(mailMessage);
+            // Definindo o e-mail do usuário como destinatário
+            mailMessage.To.Add(userEmail);
+
+            // Enviar o e-mail de forma assíncrona
+            await smtpClient.SendMailAsync(mailMessage);
         }
     }
 }

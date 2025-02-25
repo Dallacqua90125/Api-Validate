@@ -1,23 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace UserRegistrationAPI.Models
 {
     public class User
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]
-        public string Username { get; set; }
-
-        [Required]
-        [EmailAddress]
         public string Email { get; set; }
 
         [Required]
-        public string PasswordHash { get; set; }
+        public string Password { get; set; }
 
-        public bool IsEmailVerified { get; set; }
+        [JsonIgnore]
+        public string? EmailVerificationCode { get; set; }
 
-        public string EmailVerificationCode { get; set; }
+        public bool IsEmailVerified { get; set; } = false;
     }
 }
