@@ -17,6 +17,7 @@ namespace UserRegistrationAPI.Models
         [JsonIgnore]
         public string? EmailVerificationCode { get; set; }
 
+        [JsonIgnore]
         public bool IsEmailVerified { get; set; } = false;
     }
 }
