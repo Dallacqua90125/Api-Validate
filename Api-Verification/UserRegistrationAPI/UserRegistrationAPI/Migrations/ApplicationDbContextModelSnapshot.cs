@@ -39,7 +39,15 @@ namespace UserRegistrationAPI.Migrations
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Telefone")
                         .IsRequired()
                         .HasColumnType("longtext");
 

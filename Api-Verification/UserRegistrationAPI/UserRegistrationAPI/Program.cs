@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddSingleton<EmailService>();
+builder.Services.AddScoped<UsersService>();
 
 builder.Services.AddCors(options =>
 {
