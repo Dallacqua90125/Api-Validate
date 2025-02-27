@@ -1,6 +1,11 @@
 ﻿using Azure.Core;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using UserRegistrationAPI.Data;
 using UserRegistrationAPI.Models;
 using UserRegistrationAPI.Services;
@@ -13,11 +18,13 @@ namespace UserRegistrationAPI.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UsersService _usersService;
+        private readonly IConfiguration _configuration;
 
-        public UserController(ApplicationDbContext context, UsersService usersService)
+        public UserController(ApplicationDbContext context, UsersService usersService, IConfiguration configuration)
         {
             _context = context;
             _usersService = usersService;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -36,7 +43,7 @@ namespace UserRegistrationAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(User user)
+        public async Task<IActionResult> Register([FromBody] User user)
         {
             var isUserRegistered = await _usersService.RegisterUserAsync(user);
 
@@ -47,7 +54,8 @@ namespace UserRegistrationAPI.Controllers
 
             await _usersService.SendEmailAsync(user.Email, "Verify your email", $"Your verification code is: {user.EmailVerificationCode}");
 
-            return Ok(new { message = "User registered. Please check your email for the verification code." });
+            // Retorna o objeto user completo, incluindo o ID gerado
+            return Ok(user);
         }
 
         [HttpPost("verify")]
@@ -71,6 +79,47 @@ namespace UserRegistrationAPI.Controllers
             return Ok(updatedUser);
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
+            if (user == null || !user.IsEmailVerified)
+            {
+                return BadRequest("Usuário não encontrado ou e-mail não verificado.");
+            }
+
+            var token = _usersService.GeneratePasswordResetToken(user);
+            user.ResetPasswordToken = token;
+            user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(30);
+
+            await _context.SaveChangesAsync();
+
+            await _usersService.SendEmailAsync(user.Email, "Redefinir senha", $"Token para redefinir senha: {token}");
+
+            return Ok(new { message = "E-mail de redefinição de senha enviado." });
+        }
+
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] Models.ResetPasswordRequest request)
+        {
+            // Buscar o usuário que tem o código de redefinição igual ao enviado
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.ResetPasswordToken == request.Token);
+
+            if (user == null || user.ResetPasswordTokenExpiry < DateTime.UtcNow)
+            {
+                return BadRequest("Código inválido ou expirado.");
+            }
+
+            // Atualizar a senha e invalidar o código
+            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            user.ResetPasswordToken = null; // Invalidar o código
+            user.ResetPasswordTokenExpiry = null;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Senha redefinida com sucesso." });
+        }
     }
 }

@@ -25,5 +25,10 @@ namespace UserRegistrationAPI.Models
 
         [JsonIgnore]
         public bool IsEmailVerified { get; set; } = false;
+
+        [JsonIgnore]
+        public string? ResetPasswordToken { get; set; }
+        [JsonIgnore]
+        public DateTime? ResetPasswordTokenExpiry { get; set; }
     }
 }

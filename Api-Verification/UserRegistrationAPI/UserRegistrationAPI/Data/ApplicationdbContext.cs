@@ -11,5 +11,6 @@ namespace UserRegistrationAPI.Data
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<ResetPasswordRequest> resetPasswordRequests { get; set; }
     }
 }

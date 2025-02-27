@@ -3,6 +3,10 @@ using System.Net;
 using UserRegistrationAPI.Data;
 using UserRegistrationAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace UserRegistrationAPI.Services
 {
@@ -114,5 +118,17 @@ namespace UserRegistrationAPI.Services
         {
             return new Random().Next(100000, 999999).ToString();
         }
+
+        public string GeneratePasswordResetToken(User user)
+        { 
+            var random = new Random();
+            var code = random.Next(100000, 999999).ToString();
+
+            user.ResetPasswordToken = code;
+            user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(30);
+
+            return code;
+        }
+
     }
 }
