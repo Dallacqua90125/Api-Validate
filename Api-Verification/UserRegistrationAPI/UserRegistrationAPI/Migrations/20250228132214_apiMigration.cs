@@ -46,6 +46,9 @@ namespace UserRegistrationAPI.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Password = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    PhoneVerificationCode = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsPhoneVerified = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     EmailVerificationCode = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsEmailVerified = table.Column<bool>(type: "tinyint(1)", nullable: false),

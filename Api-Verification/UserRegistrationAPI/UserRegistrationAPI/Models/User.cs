@@ -21,6 +21,11 @@ namespace UserRegistrationAPI.Models
         public string Password { get; set; }
 
         [JsonIgnore]
+        public string? PhoneVerificationCode { get; set; }
+        [JsonIgnore]
+        public bool IsPhoneVerified { get; set; } = false;
+
+        [JsonIgnore]
         public string? EmailVerificationCode { get; set; }
 
         [JsonIgnore]

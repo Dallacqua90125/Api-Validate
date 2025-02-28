@@ -68,10 +68,24 @@ namespace UserRegistrationAPI.Controllers
                 return BadRequest("Invalid verification code");
             }
 
-            return Ok(new {message = "Email verified successfully" });
+            return Ok(new { message = "Email verified successfully" });
         }
 
-        [HttpPut]
+        [HttpPost("verify-phone")]
+        public async Task<IActionResult> VerifyPhoneNumber([FromBody] VerifyPhoneRequest request)
+        {
+            var isVerified = await _usersService.VerifyPhoneNumberAsync(request.PhoneNumber, request.VerificationCode);
+
+            if (!isVerified)
+            {
+                return BadRequest("Código de verificação de telefone inválido.");
+            }
+
+            return Ok(new { message = "Telefone verificado com sucesso." });
+        }
+
+
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User user)
         {
             var updatedUser = await _usersService.UpdateUserAsync(id, user);
